@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liberty Trivia Challenge</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #3043B4 0%, #7C756D 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            box-sizing: border-box;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #3043B4;
+            margin-bottom: 10px;
+            font-weight: 800;
+            font-family: 'Crimson Pro', serif;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #3043B4;
+        }
+        
+        .lives {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .heart {
+            font-size: 2em;
+            transition: all 0.3s ease;
+        }
+        
+        .heart.lost {
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+        
+        .timer-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .timer {
+            font-size: 3em;
+            font-weight: 800;
+            color: #3043B4;
+            transition: all 0.3s ease;
+        }
+        
+        .timer.warning {
+            color: #ff6b6b;
+            animation: pulse 0.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .timer-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3043B4 0%, #7C756D 100%);
+            transition: width 0.1s linear;
+            border-radius: 10px;
+        }
+        
+        .question-container {
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .difficulty-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .difficulty-easy {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .difficulty-medium {
+            background: #ffd43b;
+            color: #333;
+        }
+        
+        .difficulty-hard {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .question {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-weight: 600;
+            font-family: 'Crimson Pro', serif;
+        }
+        
+        .answers {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .answer-btn {
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            background: white;
+            border-radius: 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .answer-btn:hover:not(:disabled) {
+            border-color: #3043B4;
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(48, 67, 180, 0.3);
+        }
+        
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+        
+        .answer-btn.correct {
+            border-color: #51cf66;
+            background: #d3f9d8;
+            animation: correctAnim 0.5s ease;
+        }
+        
+        .answer-btn.wrong {
+            border-color: #ff6b6b;
+            background: #ffe3e3;
+            animation: wrongAnim 0.5s ease;
+        }
+        
+        @keyframes correctAnim {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        @keyframes wrongAnim {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        
+        .start-screen, .end-screen {
+            text-align: center;
+        }
+        
+        .start-btn, .restart-btn, .chat-btn {
+            background: linear-gradient(135deg, #3043B4 0%, #7C756D 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.3em;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .start-btn:hover, .restart-btn:hover, .chat-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(48, 67, 180, 0.4);
+        }
+        
+        .end-screen h2 {
+            font-size: 2.5em;
+            color: #3043B4;
+            margin-bottom: 20px;
+            font-family: 'Crimson Pro', serif;
+        }
+        
+        .score-display {
+            font-size: 4em;
+            font-weight: 800;
+            color: #7C756D;
+            margin: 20px 0;
+        }
+        
+        .message {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .day-info {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+        
+        .fun-fact {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #3043B4;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-style: italic;
+            color: #555;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .button-container .restart-btn,
+        .button-container .chat-btn {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+        
+        .start-screen h2 {
+            font-family: 'Crimson Pro', serif;
+            color: #3043B4;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px 15px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header p {
+                font-size: 0.95em;
+            }
+            
+            .stats {
+                padding: 15px 10px;
+                flex-wrap: wrap;
+            }
+            
+            .question {
+                font-size: 1.1em;
+            }
+            
+            .timer {
+                font-size: 2em;
+            }
+            
+            .answer-btn {
+                padding: 15px;
+                font-size: 1em;
+            }
+            
+            .start-btn, .restart-btn, .chat-btn {
+                padding: 15px 30px;
+                font-size: 1.1em;
+            }
+            
+            .button-container {
+                flex-direction: column;
+            }
+            
+            .button-container .restart-btn,
+            .button-container .chat-btn {
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .score-display {
+                font-size: 3em;
+            }
+            
+            .emoji {
+                font-size: 3.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗽 Liberty Trivia Challenge</h1>
+            <p>Test your knowledge of the Cato Institute & Libertarianism</p>
+        </div>
+        
+        <div id="startScreen" class="start-screen">
+            <div class="emoji">🎯</div>
+            <div class="day-info" id="dayInfo"></div>
+            <h2>Ready to Challenge Yourself?</h2>
+            <p class="message">
+                Answer 7 questions correctly before time runs out!<br>
+                You have 15 seconds per question and can only miss 2.<br>
+                Questions get harder as you progress!
+            </p>
+            <button class="start-btn" onclick="startGame()">Start Challenge</button>
+        </div>
+        
+        <div id="gameScreen" class="hidden">
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Question</div>
+                    <div class="stat-value"><span id="currentQ">1</span>/7</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Lives</div>
+                    <div class="lives" id="lives">
+                        <span class="heart">❤️</span>
+                        <span class="heart">❤️</span>
+                    </div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+            </div>
+            
+            <div class="timer-container">
+                <div class="timer" id="timer">15</div>
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill"></div>
+                </div>
+            </div>
+            
+            <div class="question-container">
+                <span class="difficulty-badge" id="difficultyBadge"></span>
+                <div class="question" id="question"></div>
+                <div class="answers" id="answers"></div>
+            </div>
+        </div>
+        
+        <div id="endScreen" class="hidden end-screen">
+            <div class="emoji" id="endEmoji"></div>
+            <h2 id="endTitle"></h2>
+            <div class="score-display" id="finalScore"></div>
+            <p class="message" id="endMessage"></p>
+            <div class="fun-fact" id="funFact"></div>
+            <div class="button-container">
+                <button class="restart-btn" onclick="restartGame()">Play Again Tomorrow!</button>
+                <a href="https://www.catocourses.org/chat" target="_blank" style="text-decoration: none;">
+                    <button class="chat-btn">Try Talk Liberty</button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Question bank organized by difficulty
+        const questionBank = {
+            easy: [
+                {
+                    question: "Where is the Cato Institute headquartered?",
+                    answers: ["Washington, D.C.", "New York City", "San Francisco", "Chicago"],
+                    correct: 0,
+                    fact: "The Cato Institute was founded in 1977 and moved to Washington, D.C. in 1981."
+                },
+                {
+                    question: "What type of think tank is the Cato Institute?",
+                    answers: ["Libertarian", "Conservative", "Progressive", "Socialist"],
+                    correct: 0,
+                    fact: "Cato promotes classical liberal principles, including individual liberty and limited government."
+                },
+                {
+                    question: "In what year was Libertarianism.org launched?",
+                    answers: ["2015", "2010", "2005", "2000"],
+                    correct: 0,
+                    fact: "Libertarianism.org was launched as a project of the Cato Institute to spread libertarian ideas."
+                },
+                {
+                    question: "What is a core belief of libertarianism?",
+                    answers: ["Individual liberty", "Large government", "Central planning", "Monarchy"],
+                    correct: 0,
+                    fact: "Libertarianism emphasizes individual freedom, voluntary cooperation, and limited government."
+                },
+                {
+                    question: "Who is often called the 'founder of modern economics'?",
+                    answers: ["Adam Smith", "Karl Marx", "John Keynes", "Milton Friedman"],
+                    correct: 0,
+                    fact: "Adam Smith's 'The Wealth of Nations' (1776) laid the foundation for free market economics."
+                },
+                {
+                    question: "What does 'laissez-faire' mean?",
+                    answers: ["Let people do as they choose", "Government control", "Tax and spend", "Regulation"],
+                    correct: 0,
+                    fact: "Laissez-faire is French for 'let do' and refers to minimal government intervention in the economy."
+                },
+                {
+                    question: "Which amendment protects freedom of speech?",
+                    answers: ["First Amendment", "Second Amendment", "Fourth Amendment", "Fifth Amendment"],
+                    correct: 0,
+                    fact: "The First Amendment protects freedoms of religion, speech, press, assembly, and petition."
+                }
+            ],
+            medium: [
+                {
+                    question: "Who founded the Cato Institute?",
+                    answers: ["Ed Crane and Charles Koch", "Milton Friedman", "F.A. Hayek", "Ayn Rand"],
+                    correct: 0,
+                    fact: "Ed Crane and Charles Koch founded Cato in 1977, originally in San Francisco."
+                },
+                {
+                    question: "What does the Non-Aggression Principle (NAP) state?",
+                    answers: ["Don't initiate force against others", "Always defend the nation", "Tax the rich", "Vote in every election"],
+                    correct: 0,
+                    fact: "The NAP is central to libertarian philosophy and opposes initiating force or fraud."
+                },
+                {
+                    question: "Which economist wrote 'The Road to Serfdom'?",
+                    answers: ["F.A. Hayek", "Ludwig von Mises", "Murray Rothbard", "Ayn Rand"],
+                    correct: 0,
+                    fact: "Hayek's 1944 book warned about the dangers of central planning leading to tyranny."
+                },
+                {
+                    question: "What is 'spontaneous order' in economics?",
+                    answers: ["Order emerging without central planning", "Government regulation", "Military discipline", "Corporate hierarchy"],
+                    correct: 0,
+                    fact: "Spontaneous order describes how markets coordinate through prices without central control."
+                },
+                {
+                    question: "Who wrote 'Free to Choose'?",
+                    answers: ["Milton Friedman", "Thomas Sowell", "Friedrich Hayek", "Ayn Rand"],
+                    correct: 0,
+                    fact: "Milton and Rose Friedman's 1980 book became a popular TV series promoting free markets."
+                },
+                {
+                    question: "What is regulatory capture?",
+                    answers: ["When industries control their regulators", "Catching criminals", "Market failure", "Tax avoidance"],
+                    correct: 0,
+                    fact: "Regulatory capture occurs when regulatory agencies advance the interests of the industries they regulate."
+                },
+                {
+                    question: "Which philosopher influenced libertarian thought with 'Anarchy, State, and Utopia'?",
+                    answers: ["Robert Nozick", "John Rawls", "Karl Marx", "Thomas Hobbes"],
+                    correct: 0,
+                    fact: "Nozick's 1974 book argued for a minimal 'night-watchman' state."
+                }
+            ],
+            hard: [
+                {
+                    question: "What was the original name of the Cato Institute before it moved to D.C.?",
+                    answers: ["Charles Koch Foundation", "Liberty Institute", "Freedom Foundation", "Market Institute"],
+                    correct: 0,
+                    fact: "The organization was initially called the Charles Koch Foundation before becoming Cato."
+                },
+                {
+                    question: "Who wrote 'The Calculus of Consent', foundational to public choice theory?",
+                    answers: ["James Buchanan and Gordon Tullock", "Milton Friedman", "Gary Becker", "Ronald Coase"],
+                    correct: 0,
+                    fact: "Their 1962 work applied economic analysis to political decision-making."
+                },
+                {
+                    question: "What economic concept did Ronald Coase introduce in 'The Problem of Social Cost'?",
+                    answers: ["Coase Theorem on property rights", "Supply and demand", "Marginal utility", "Comparative advantage"],
+                    correct: 0,
+                    fact: "The Coase Theorem shows how clear property rights can solve externalities without government."
+                },
+                {
+                    question: "Which libertarian wrote 'Man, Economy, and State'?",
+                    answers: ["Murray Rothbard", "Ludwig von Mises", "F.A. Hayek", "Henry Hazlitt"],
+                    correct: 0,
+                    fact: "Rothbard's 1962 treatise is a comprehensive work of Austrian economics."
+                },
+                {
+                    question: "What is 'economic calculation problem' in socialism?",
+                    answers: ["Impossibility of rational pricing without markets", "Tax collection issues", "Budget deficits", "Inflation"],
+                    correct: 0,
+                    fact: "Mises argued that socialist economies can't efficiently allocate resources without market prices."
+                },
+                {
+                    question: "Who developed the concept of 'catallactics'?",
+                    answers: ["F.A. Hayek", "Carl Menger", "Eugen Böhm-Bawerk", "Joseph Schumpeter"],
+                    correct: 0,
+                    fact: "Hayek used 'catallactics' to describe the science of exchanges and voluntary cooperation."
+                },
+                {
+                    question: "What is the 'knowledge problem' Hayek identified?",
+                    answers: ["Dispersed knowledge can't be centralized", "Lack of education", "Information asymmetry", "Media bias"],
+                    correct: 0,
+                    fact: "Hayek argued that local, tacit knowledge makes central planning impossible."
+                }
+            ]
+        };
+        
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let lives = 2;
+        let timeLeft = 15;
+        let timer = null;
+        let dailyQuestions = [];
+        let hasPlayedToday = false;
+        
+        // Get day of week (0 = Sunday, 6 = Saturday)
+        function getDayOfWeek() {
+            return new Date().getDay();
+        }
+        
+        // Get seed for the day
+        function getDaySeed() {
+            const today = new Date();
+            return today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+        }
+        
+        // Simple seeded random number generator
+        function seededRandom(seed) {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+        
+        // Generate daily questions based on day of week
+        function generateDailyQuestions() {
+            const dayOfWeek = getDayOfWeek();
+            const seed = getDaySeed();
+            const questions = [];
+            
+            // Difficulty distribution changes by day
+            // Sunday: Easiest (5 easy, 2 medium)
+            // Saturday: Hardest (2 easy, 2 medium, 3 hard)
+            const distributions = [
+                { easy: 5, medium: 2, hard: 0 },  // Sunday
+                { easy: 4, medium: 2, hard: 1 },  // Monday
+                { easy: 4, medium: 2, hard: 1 },  // Tuesday
+                { easy: 3, medium: 3, hard: 1 },  // Wednesday
+                { easy: 3, medium: 2, hard: 2 },  // Thursday
+                { easy: 2, medium: 3, hard: 2 },  // Friday
+                { easy: 2, medium: 2, hard: 3 }   // Saturday
+            ];
+            
+            const dist = distributions[dayOfWeek];
+            
+            // Create a shuffled question set for each difficulty
+            const shuffled = {
+                easy: [...questionBank.easy].sort(() => seededRandom(seed + 1) - 0.5),
+                medium: [...questionBank.medium].sort(() => seededRandom(seed + 2) - 0.5),
+                hard: [...questionBank.hard].sort(() => seededRandom(seed + 3) - 0.5)
+            };
+            
+            // Build question array with progressive difficulty
+            let easyCount = 0, mediumCount = 0, hardCount = 0;
+            
+            for (let i = 0; i < 7; i++) {
+                if (i < dist.easy) {
+                    questions.push({ ...shuffled.easy[easyCount++], difficulty: 'easy' });
+                } else if (i < dist.easy + dist.medium) {
+                    questions.push({ ...shuffled.medium[mediumCount++], difficulty: 'medium' });
+                } else {
+                    questions.push({ ...shuffled.hard[hardCount++], difficulty: 'hard' });
+                }
+            }
+            
+            return questions;
+        }
+        
+        // Check if player has already played today
+        function checkIfPlayedToday() {
+            const lastPlayed = localStorage.getItem('lastPlayed');
+            const today = new Date().toDateString();
+            return lastPlayed === today;
+        }
+        
+        // Mark as played today
+        function markPlayedToday() {
+            const today = new Date().toDateString();
+            localStorage.setItem('lastPlayed', today);
+        }
+        
+        // Initialize game
+        function initGame() {
+            hasPlayedToday = checkIfPlayedToday();
+            dailyQuestions = generateDailyQuestions();
+            
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayOfWeek = getDayOfWeek();
+            const difficulty = ['Warm-up', 'Easy', 'Moderate', 'Challenging', 'Tough', 'Difficult', 'Expert'];
+            
+            document.getElementById('dayInfo').innerHTML = 
+                `📅 ${dayNames[dayOfWeek]}'s Challenge - Difficulty: ${difficulty[dayOfWeek]}`;
+            
+            if (hasPlayedToday) {
+                document.getElementById('dayInfo').innerHTML += '<br>✅ You\'ve already completed today\'s challenge!';
+                document.querySelector('.start-btn').textContent = 'Play Again (Practice)';
+            }
+        }
+        
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            lives = 2;
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('endScreen').classList.add('hidden');
+            
+            updateStats();
+            loadQuestion();
+        }
+        
+        function loadQuestion() {
+            if (currentQuestionIndex >= dailyQuestions.length) {
+                endGame(true);
+                return;
+            }
+            
+            const q = dailyQuestions[currentQuestionIndex];
+            
+            document.getElementById('question').textContent = q.question;
+            document.getElementById('difficultyBadge').textContent = q.difficulty.toUpperCase();
+            document.getElementById('difficultyBadge').className = `difficulty-badge difficulty-${q.difficulty}`;
+            
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+            
+            q.answers.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.onclick = () => selectAnswer(index);
+                answersDiv.appendChild(btn);
+            });
+            
+            startTimer();
+        }
+        
+        function startTimer() {
+            timeLeft = 15;
+            updateTimer();
+            
+            if (timer) clearInterval(timer);
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    selectAnswer(-1); // Time's up
+                }
+            }, 1000);
+        }
+        
+        function updateTimer() {
+            const timerEl = document.getElementById('timer');
+            const fillEl = document.getElementById('timerFill');
+            
+            timerEl.textContent = timeLeft;
+            fillEl.style.width = (timeLeft / 15 * 100) + '%';
+            
+            if (timeLeft <= 5) {
+                timerEl.classList.add('warning');
+            } else {
+                timerEl.classList.remove('warning');
+            }
+        }
+        
+        function selectAnswer(selectedIndex) {
+            clearInterval(timer);
+            
+            const q = dailyQuestions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach(btn => btn.disabled = true);
+            
+            if (selectedIndex === q.correct) {
+                buttons[selectedIndex].classList.add('correct');
+                score += q.difficulty === 'easy' ? 10 : q.difficulty === 'medium' ? 20 : 30;
+                
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    updateStats();
+                    loadQuestion();
+                }, 1500);
+            } else {
+                if (selectedIndex >= 0) {
+                    buttons[selectedIndex].classList.add('wrong');
+                }
+                buttons[q.correct].classList.add('correct');
+                
+                lives--;
+                updateLives();
+                
+                if (lives < 0) {
+                    setTimeout(() => endGame(false), 1500);
+                } else {
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        updateStats();
+                        loadQuestion();
+                    }, 2000);
+                }
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('score').textContent = score;
+        }
+        
+        function updateLives() {
+            const hearts = document.querySelectorAll('.heart');
+            hearts.forEach((heart, index) => {
+                if (index > lives) {
+                    heart.classList.add('lost');
+                }
+            });
+        }
+        
+        function endGame(won) {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            
+            if (won) {
+                document.getElementById('endEmoji').textContent = '🏆';
+                document.getElementById('endTitle').textContent = 'Victory!';
+                document.getElementById('endMessage').innerHTML = 
+                    `Congratulations! You've mastered today's Liberty Challenge!<br>
+                    You're a true defender of freedom and knowledge!`;
+                if (!hasPlayedToday) {
+                    markPlayedToday();
+                }
+            } else {
+                document.getElementById('endEmoji').textContent = '💪';
+                document.getElementById('endTitle').textContent = 'Keep Learning!';
+                document.getElementById('endMessage').innerHTML = 
+                    `Don't worry! Every defeat is a learning opportunity.<br>
+                    Come back tomorrow for a fresh challenge!`;
+            }
+            
+            document.getElementById('finalScore').textContent = score;
+            
+            // Show a random fun fact
+            const allQuestions = [...questionBank.easy, ...questionBank.medium, ...questionBank.hard];
+            const randomFact = allQuestions[Math.floor(Math.random() * allQuestions.length)].fact;
+            document.getElementById('funFact').innerHTML = `<strong>💡 Did you know?</strong><br>${randomFact}`;
+        }
+        
+        function restartGame() {
+            initGame();
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+        
+        // Initialize on load
+        initGame();
+    </script>
+</body>
+</html>
