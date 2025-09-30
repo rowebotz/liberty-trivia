@@ -12,10 +12,6 @@ An interactive daily trivia game testing knowledge of the Cato Institute and Lib
 - Beautiful, responsive design
 - Tracks if you've already played today
 
-## Play Now
-
-Visit the live game at: [https://YOUR-USERNAME.github.io/liberty-trivia/](https://YOUR-USERNAME.github.io/liberty-trivia/)
-
 ## About
 
 This trivia game was created for the Cato Institute to help people learn about libertarian principles, economics, and the history of liberty in a fun, engaging way.
